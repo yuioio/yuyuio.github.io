@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎂 年龄验证</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #0b0b1a;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* ---------- 年龄弹窗 ---------- */
+        #ageModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-box {
+            background: linear-gradient(145deg, #1e1e2f, #2a2a3e);
+            padding: 3rem 4rem;
+            border-radius: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            max-width: 480px;
+            width: 90%;
+        }
+
+        .modal-box h1 {
+            font-size: 2.2rem;
+            color: #ff6b6b;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-box .icon {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-box p {
+            color: #ccc;
+            font-size: 1.1rem;
+            margin: 1rem 0 2rem 0;
+            line-height: 1.6;
+        }
+
+        .modal-box .btn-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-box button {
+            padding: 0.8rem 2.8rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.25s ease;
+            letter-spacing: 1px;
+        }
+
+        .btn-yes {
+            background: #2ecc71;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+        .btn-yes:hover {
+            transform: scale(1.06);
+            background: #27ae60;
+        }
+
+        .btn-no {
+            background: #e74c3c;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        }
+        .btn-no:hover {
+            transform: scale(1.06);
+            background: #c0392b;
+        }
+
+        .modal-hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        /* ---------- 铺满屏幕的图片 ---------- */
+        .troll-img {
+            position: fixed;
+            pointer-events: none;   /* 让图片不阻挡任何点击（但铺满后也不影响） */
+            z-index: 99999;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== 年龄弹窗 ====== -->
+    <div id="ageModal">
+        <div class="modal-box">
+            <div class="icon">🔞</div>
+            <h1>年龄验证</h1>
+            <p>
+                本页面包含 <strong>“特殊内容”</strong>，<br />
+                请确认你是否已年满 <strong>18 周岁</strong>？
+            </p>
+            <div class="btn-group">
+                <button class="btn-yes" id="btnYes">✅ 是的，我满了</button>
+                <button class="btn-no" id="btnNo">❌ 没有，我还没满</button>
+            </div>
+            <p style="margin-top:1.5rem; font-size:0.8rem; opacity:0.4;">
+                * 无论点哪个，结果都一样 😏
+            </p>
+        </div>
+    </div>
+
+    <!-- ====== 隐藏音频容器 ====== -->
+    <div id="audioContainer" style="display:none;"></div>
+
+    <script>
+        // ================================================================
+        //  ★★★ 重要：请将你的两张 JPEG 图片放在与 HTML 相同的目录下 ★★★
+        //  并将下面的文件名改成你实际的文件名（默认 img1.jpg 和 img2.jpg）
+        // ================================================================
+        const IMG_URLS = [
+            'img1.jpg',   // 你的第一张图片
+            'img2.jpg'    // 你的第二张图片
+        ];
+
+        // ---------- 开始恶搞 ----------
+        function startTroll() {
+            // 隐藏弹窗
+            const modal = document.getElementById('ageModal');
+            modal.classList.add('modal-hidden');
+
+            // 背景音乐（Rickroll）
+            const container = document.getElementById('audioContainer');
+            const iframe = document.createElement('iframe');
+            iframe.width = '0';
+            iframe.height = '0';
+            iframe.style.display = 'none';
+            iframe.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0';
+            iframe.allow = 'autoplay; encrypted-media';
+            container.appendChild(iframe);
+
+            // 疯狂生成图片
+            let count = 0;
+            const MAX_IMAGES = 350;
+
+            const interval = setInterval(() => {
+                for (let i = 0; i < 6; i++) {
+                    if (count >= MAX_IMAGES) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    createTrollImage();
+                    count++;
+                }
+            }, 30);
+
+            setTimeout(() => {
+                clearInterval(interval);
+            }, 5000);
+        }
+
+        // ---------- 创建单张图片（随机位置/大小/旋转） ----------
+        function createTrollImage() {
+            const img = document.createElement('img');
+            img.className = 'troll-img';
+
+            // 从两张图片中随机选一张
+            const randomIndex = Math.floor(Math.random() * IMG_URLS.length);
+            img.src = IMG_URLS[randomIndex];
+
+            // 如果图片加载失败（比如文件名不对），显示一个错误提示（可选）
+            img.onerror = function() {
+                this.alt = '图片加载失败';
+                this.style.border = '2px solid red';
+            };
+
+            // 随机位置（百分比）
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            // 随机大小（150~350px）
+            const size = 150 + Math.random() * 200;
+            // 随机旋转（-180° ~ 180°）
+            const rotate = (Math.random() - 0.5) * 360;
+
+            img.style.left = left + 'vw';
+            img.style.top = top + 'vh';
+            img.style.width = size + 'px';
+            img.style.height = size + 'px';
+            img.style.transform = `rotate(${rotate}deg)`;
+
+            document.body.appendChild(img);
+        }
+
+        // ---------- 绑定按钮 ----------
+        document.getElementById('btnYes').addEventListener('click', startTroll);
+        document.getElementById('btnNo').addEventListener('click', startTroll);
+    </script>
+</body>
+</html>
