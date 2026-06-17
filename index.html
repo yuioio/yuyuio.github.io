@@ -110,7 +110,7 @@
         /* ---------- 铺满屏幕的图片 ---------- */
         .troll-img {
             position: fixed;
-            pointer-events: none;   /* 让图片不阻挡任何点击（但铺满后也不影响） */
+            pointer-events: none;
             z-index: 99999;
             object-fit: contain;
         }
@@ -132,17 +132,14 @@
                 <button class="btn-no" id="btnNo">❌ 没有，我还没满</button>
             </div>
             <p style="margin-top:1.5rem; font-size:0.8rem; opacity:0.4;">
-                * 无论点哪个，结果都一样 😏
+                * 
             </p>
         </div>
     </div>
 
-    <!-- ====== 隐藏音频容器 ====== -->
-    <div id="audioContainer" style="display:none;"></div>
-
     <script>
         // ================================================================
-        //  ★★★ 重要：请将你的两张 JPEG 图片放在与 HTML 相同的目录下 ★★★
+        //  ★★★ 请将你的两张 JPEG 图片放在与 HTML 相同的目录下 ★★★
         //  并将下面的文件名改成你实际的文件名（默认 img1.jpg 和 img2.jpg）
         // ================================================================
         const IMG_URLS = [
@@ -152,21 +149,22 @@
 
         // ---------- 开始恶搞 ----------
         function startTroll() {
-            // 隐藏弹窗
+            // 1. 隐藏弹窗
             const modal = document.getElementById('ageModal');
             modal.classList.add('modal-hidden');
 
-            // 背景音乐（Rickroll）
-            const container = document.getElementById('audioContainer');
-            const iframe = document.createElement('iframe');
-            iframe.width = '0';
-            iframe.height = '0';
-            iframe.style.display = 'none';
-            iframe.src = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0';
-            iframe.allow = 'autoplay; encrypted-media';
-            container.appendChild(iframe);
+            // 2. ★ 播放《Never Gonna Give You Up》MP3（循环播放） ★
+            const audio = new Audio('https://www.computerhope.com/jargon/r/rickroll.mp3');
+            audio.loop = true;      // 循环播放
+            audio.volume = 0.8;     // 音量 80%
+            audio.play().catch(err => {
+                // 如果浏览器拦截自动播放，静默处理（但点击按钮触发的播放通常不会被拦）
+                console.log('音频播放被拦截，请手动点击页面触发');
+            });
 
-            // 疯狂生成图片
+            // 3. 疯狂生成图片铺满屏幕
+            const INTERVAL_MS = 100;      // 原来是 30
+            const BATCH_SIZE = 6;         // 每批生成 6 张
             let count = 0;
             const MAX_IMAGES = 350;
 
@@ -181,6 +179,7 @@
                 }
             }, 30);
 
+            // 保险：5秒后强制停止生成，防止浏览器卡死
             setTimeout(() => {
                 clearInterval(interval);
             }, 5000);
@@ -191,22 +190,18 @@
             const img = document.createElement('img');
             img.className = 'troll-img';
 
-            // 从两张图片中随机选一张
             const randomIndex = Math.floor(Math.random() * IMG_URLS.length);
             img.src = IMG_URLS[randomIndex];
 
-            // 如果图片加载失败（比如文件名不对），显示一个错误提示（可选）
             img.onerror = function() {
-                this.alt = '图片加载失败';
-                this.style.border = '2px solid red';
+                this.alt = '图片加载失败，请检查文件名';
+                this.style.border = '3px solid red';
+                this.style.backgroundColor = '#ff000033';
             };
 
-            // 随机位置（百分比）
             const left = Math.random() * 100;
             const top = Math.random() * 100;
-            // 随机大小（150~350px）
             const size = 150 + Math.random() * 200;
-            // 随机旋转（-180° ~ 180°）
             const rotate = (Math.random() - 0.5) * 360;
 
             img.style.left = left + 'vw';
